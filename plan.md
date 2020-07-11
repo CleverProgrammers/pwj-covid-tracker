@@ -1,3 +1,11 @@
+# July 11 Plan Of Action
+
+- Add Search functionality DONE
+- Change the data of the tabs depending on country DONE
+- Change location of map depending on selection DONE
+- Add hover and active states for the tabs
+- Add a container for the map
+
 # July 8 Plan Of Action
 
 - Modify COVID Title DONE

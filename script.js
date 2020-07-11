@@ -1,7 +1,7 @@
 
 
 window.onload = () => {
-    getCountryData();
+    getCountriesData();
     getHistoricalData();
     getWorldCoronaData();
 }
@@ -11,15 +11,24 @@ var map;
 var infoWindow;
 let coronaGlobalData;
 let mapCircles = [];
+const wordwideSelection = {
+    name: 'Worldwide',
+    value: 'www',
+    selected: true
+}
 var casesTypeColors = {
     cases: '#1d2c4d',
     active: '#9d80fe',
     recovered: '#7dd71d',
     deaths: '#fb4443'
 }
+const mapCenter = {
+    lat: 34.80746,
+    lng: -40.4796
+}
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 39.8283, lng: -98.5795},
+        center: mapCenter,
         zoom: 3,
         styles: mapStyle
     });
@@ -37,24 +46,68 @@ const clearTheMap = () => {
     }
 }
 
-const getCountryData = () => {
+const setMapCenter = (lat, long, zoom) => {
+    map.setZoom(zoom);
+    map.panTo({
+        lat: lat,
+        lng: long
+    })
+}
+
+const initDropdown = (searchList) => {
+    $('.ui.dropdown').dropdown({
+        values: searchList,
+        onChange: function(value, text) {
+            if(value !== wordwideSelection.value){
+                getCountryData(value);
+            } else {
+                getWorldCoronaData();
+            }
+        }
+    });
+}
+
+const setSearchList = (data) => {
+    let searchList = [];
+    searchList.push(wordwideSelection);
+    data.forEach((countryData)=>{
+        searchList.push({
+            name: countryData.country,
+            value: countryData.countryInfo.iso3
+        })
+    })
+    initDropdown(searchList);
+}
+
+const getCountriesData = () => {
     fetch("https://corona.lmao.ninja/v2/countries")
     .then((response)=>{
         return response.json()
     }).then((data)=>{
         coronaGlobalData = data;
+        setSearchList(data);
         showDataOnMap(data);
         showDataInTable(data);
     })
 }
 
+const getCountryData = (countryIso) => {
+    const url = "https://disease.sh/v3/covid-19/countries/" + countryIso;
+    fetch(url)
+    .then((response)=>{
+        return response.json()
+    }).then((data)=>{
+        setMapCenter(data.countryInfo.lat, data.countryInfo.long, 3);
+        setStatsData(data);
+    })
+}
 const getWorldCoronaData = () => {
     fetch("https://disease.sh/v2/all")
     .then((response)=>{
         return response.json()
     }).then((data)=>{
-        // buildPieChart(data);
         setStatsData(data);
+        setMapCenter(mapCenter.lat, mapCenter.lng, 2);
     })
 }
 
@@ -70,12 +123,7 @@ const setStatsData = (data) => {
     document.querySelector('.deaths-number').innerHTML = addedDeaths;
     document.querySelector('.cases-total').innerHTML = `${totalCases} Total`;
     document.querySelector('.recovered-total').innerHTML = `${totalRecovered} Total`;
-    document.querySelector('.deaths-total').innerHTML = `${totalDeaths} Total`;
-
-
-
-
-    
+    document.querySelector('.deaths-total').innerHTML = `${totalDeaths} Total`;    
 }
 
 const getHistoricalData = () => {
