@@ -1,3 +1,9 @@
+# July 15 Plan Of Action
+
+- Add hover and active state to buttons DONE
+- Convert the graph from total cases to new cases DONE
+- Add Mobile Friendliness DONE
+
 # July 11 Plan Of Action
 
 - Add Search functionality DONE
